@@ -17,10 +17,13 @@ public class StockExchange {
 	}
 
 	public void run() {
-		Timer timer = new Timer();
-		ExchangeTask exTask = new ExchangeTask();
-		timer.scheduleAtFixedRate(exTask, new Date(System.currentTimeMillis()),
-				StockExchange.random(5, 15));
+		for (StockQuote stock : this.stockList) {
+			Timer timer = new Timer();
+			ExchangeTask exTask = new ExchangeTask(stock);
+			timer.scheduleAtFixedRate(exTask,
+					new Date(System.currentTimeMillis()),
+					StockExchange.random(5, 15));
+		}
 	}
 
 	public void close() {
@@ -49,26 +52,30 @@ public class StockExchange {
 
 	private static class ExchangeTask extends TimerTask {
 
+		private StockQuote stockQuote;
+
+		public ExchangeTask(StockQuote stockQuote) {
+			this.stockQuote = stockQuote;
+		}
+
 		@Override
 		public void run() {
-			for (StockQuote quote : stockList) {
-				double newStockQuote = 0;
-				newStockQuote = quote.getQuote() + this.computeVariance(15);
-				quote.setQuote(newStockQuote);
-				quote.setTimeInMillis(System.currentTimeMillis());
-				publisher.publishObjectMessage(quote);
-			}
+			double newStockQuote = 0;
+			newStockQuote = stockQuote.getQuote() + this.computeVariance(15);
+			stockQuote.setQuote(newStockQuote);
+			stockQuote.setTimeInMillis(System.currentTimeMillis());
+			publisher.publishObjectMessage(stockQuote);
 		}
 
 		private long computeVariance(double variance) {
-			Double randomValue =  Math.random() * 1000;
+			Double randomValue = Math.random() * 1000;
 			int randomSign = (randomValue.intValue() % 2 == 0) ? -1 : 1;
 			long value = (long) (0 + (Math.random() * ((variance - 0) + 1)));
 			return value * randomSign;
 		}
 	}
 
-    public StockQuote getCurrentQuote(String stockName){
+	public StockQuote getCurrentQuote(String stockName) {
 		for (StockQuote quote : stockList) {
 			if (quote.getName().equals(stockName)) {
 				return quote;
@@ -76,7 +83,7 @@ public class StockExchange {
 		}
 		return null;
 	}
-    
+
 	public static long random(double min, double max) {
 		return (long) (1000 * (min + (Math.random() * ((max - min) + 1))));
 	}

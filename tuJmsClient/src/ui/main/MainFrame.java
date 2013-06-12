@@ -185,6 +185,7 @@ public class MainFrame extends Application {
 			this.getPrimaryStage().hide();
 			this.getPrimaryStage().close();
 			this.stop();
+			System.exit(0);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
