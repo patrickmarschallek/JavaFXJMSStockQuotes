@@ -2,6 +2,7 @@
 .classpath
 .project
 .DS_Store
+*/.settings*
 
 # Package Files #
 *.jar
