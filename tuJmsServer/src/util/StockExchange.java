@@ -53,22 +53,30 @@ public class StockExchange {
 		public void run() {
 			for (StockQuote quote : stockList) {
 				double newStockQuote = 0;
-				newStockQuote = quote.getQuote() + this.computeVariance(2);
+				newStockQuote = quote.getQuote() + this.computeVariance(15);
 				quote.setQuote(newStockQuote);
 				quote.setTimeInMillis(System.currentTimeMillis());
 				publisher.publishObjectMessage(quote);
 			}
-
 		}
 
 		private long computeVariance(double variance) {
-//			Double randomValue =  Math.random() * 1000;
-//			int randomSign = (randomValue.intValue() % 2 == 0) ? -1 : 1;
+			Double randomValue =  Math.random() * 1000;
+			int randomSign = (randomValue.intValue() % 2 == 0) ? -1 : 1;
 			long value = (long) (0 + (Math.random() * ((variance - 0) + 1)));
-			return value;
+			return value * randomSign;
 		}
 	}
 
+    public StockQuote getCurrentQuote(String stockName){
+		for (StockQuote quote : stockList) {
+			if (quote.getName().equals(stockName)) {
+				return quote;
+			}
+		}
+		return null;
+	}
+    
 	public static long random(double min, double max) {
 		return (long) (1000 * (min + (Math.random() * ((max - min) + 1))));
 	}

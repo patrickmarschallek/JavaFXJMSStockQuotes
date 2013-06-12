@@ -1,12 +1,16 @@
 package jms;
 
 import java.io.Serializable;
+import java.util.Random;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
+import javax.jms.Queue;
 import javax.jms.Session;
+import javax.jms.TemporaryQueue;
 import javax.jms.Topic;
 
 import jms.handle.MessageHandler;
@@ -26,6 +30,8 @@ public class TopicConsumer implements Serializable {
 	private transient Connection connection;
 	private transient Session session;
 	private transient MessageListener messageHanlder;
+	private transient Queue requestsQueue;
+	
 	private String url;
 	private Topic topic;
 
@@ -45,8 +51,25 @@ public class TopicConsumer implements Serializable {
 		this.connection = this.factory.createConnection();
 		this.session = this.connection.createSession(false,
 				Session.AUTO_ACKNOWLEDGE);
+		requestsQueue = session.createQueue("requests");
 	}
 
+	public void requestReply(String stockName) throws JMSException {
+
+		TemporaryQueue replyQueue = session.createTemporaryQueue();
+		MessageConsumer qConsumer = session.createConsumer(replyQueue);
+		qConsumer.setMessageListener(this.messageHanlder);
+
+		Message message = session.createMessage();
+		message.setJMSReplyTo(replyQueue);
+		message.setStringProperty("stockName", stockName);
+		String correlationId = this.createRandomString();
+		message.setJMSCorrelationID(correlationId);
+
+		session.createProducer(requestsQueue).send(
+				message);
+	}
+		
 	public void subscribe(String stockName) throws JMSException {
 		this.topic = session.createTopic("dax." + stockName);
 		MessageConsumer consumer = session.createConsumer(topic);
@@ -62,4 +85,10 @@ public class TopicConsumer implements Serializable {
 		return this.connection;
 	}
 
+	private String createRandomString() {
+		Random random = new Random(System.currentTimeMillis());
+		long randomLong = random.nextLong();
+		return Long.toHexString(randomLong);
+	}
+	
 }

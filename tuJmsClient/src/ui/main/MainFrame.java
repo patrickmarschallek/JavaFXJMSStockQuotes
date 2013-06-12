@@ -165,26 +165,6 @@ public class MainFrame extends Application {
 				this.txtUnsubscribe, this.btnClose);
 		this.buttonPanel.setAlignment(Pos.CENTER_LEFT);
 	}
-
-	public void updateTableObjects(final StockQuote quote) {
-		for (final StockQuote stockQuote : this.table.getItems()) {
-			if (stockQuote.getName().equals(quote.getName())) {
-				Platform.runLater(new Runnable() {
-					@Override
-					public void run() {
-						stockQuote.setQuote(quote.getQuotePlain());
-						stockQuote.setTimeInMillis(quote.getTimeInMillisPlain());
-						if (stockQuote.getWkn().isEmpty()) {
-							stockQuote.setWkn(quote.getWkn());
-						}
-						if (stockQuote.getIsin().isEmpty()) {
-							stockQuote.setIsin(quote.getIsin());
-						}
-					}
-				});
-			}
-		}
-	}
 	
 	public void fillSerie(final XYChart.Series<String, Number> serie,
 			long time, double quote) {

@@ -38,7 +38,7 @@ public class MessageHandler implements MessageListener {
 				}
 			}
 
-			this.frame.updateTableObjects(quote);
+			this.frame.getTable().updateTableObjects(quote);
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}

@@ -34,7 +34,7 @@ public class Table extends TableView<StockQuote> {
 				this.createTableColumn("Time", 90, "timeInMillis"));
 
 		this.setPrefSize(800, 100);
-		
+
 		// bindings
 		this.setItems(this.stockList);
 	}
@@ -47,6 +47,32 @@ public class Table extends TableView<StockQuote> {
 		column.setCellValueFactory(new PropertyValueFactory<StockQuote, String>(
 				propertyName));
 		return column;
+	}
+
+	public void updateTableObjects(final StockQuote quote) {
+		final ObservableList<StockQuote> list = this.getItems();
+		final Table table = this;
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				for (final StockQuote stockQuote : list) {
+					if (stockQuote.getName().equals(quote.getName())) {
+						stockQuote.setQuote(quote.getQuotePlain());
+						stockQuote.setTimeInMillis(quote.getTimeInMillisPlain());
+						if (stockQuote.getWkn().isEmpty()) {
+							stockQuote.setWkn(quote.getWkn());
+						}
+						if (stockQuote.getIsin().isEmpty()) {
+							stockQuote.setIsin(quote.getIsin());
+						}
+						table.getColumns().get(0).setVisible(false);
+						table.getColumns().get(0).setVisible(true);
+						
+					}
+				}
+			}
+		});
+
 	}
 
 	public void addQuote(final StockQuote quote) {
