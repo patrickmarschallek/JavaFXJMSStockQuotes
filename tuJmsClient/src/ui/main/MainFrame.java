@@ -25,15 +25,12 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.RowConstraintsBuilder;
 import javafx.stage.Stage;
 import model.Stock;
-import model.StockQuote;
 import ui.components.Table;
 import ui.handler.CloseHandler;
 import ui.handler.SearchSubmit;
 import ui.handler.UnsubscribeHandler;
 
 public class MainFrame extends Application {
-
-	private static final long serialVersionUID = 1L;
 
 	private ArrayList<Stock> stocks = new ArrayList<Stock>();
 	private HashMap<String, XYChart.Series<String, Number>> serieMap = new HashMap<String, XYChart.Series<String, Number>>();

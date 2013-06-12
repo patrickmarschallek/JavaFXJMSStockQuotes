@@ -70,6 +70,14 @@ public class StockQuote implements Serializable {
 		this.timeInMillis.set(timeInMillis);
 	}
 
+	public void setWkn(String wkn2) {
+		this.wkn.set(wkn2);
+	}
+
+	public void setIsin(String isin) {
+		this.isin.set(isin);
+	}
+	
 	@Override
 	public boolean equals(Object arg0) {
 		if (arg0 instanceof StockQuote) {
@@ -85,11 +93,4 @@ public class StockQuote implements Serializable {
 		return false;
 	}
 
-	public void setWkn(String wkn2) {
-		this.wkn.set(wkn2);
-	}
-
-	public void setIsin(String isin) {
-		this.isin.set(isin);
-	}
 }
