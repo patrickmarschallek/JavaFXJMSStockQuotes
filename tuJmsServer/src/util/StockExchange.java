@@ -10,6 +10,7 @@ import jms.TopicPublisher;
 public class StockExchange {
 
 	private static TopicPublisher publisher;
+	private final static ArrayList<StockQuote> stockList = generateQuotes();
 
 	public StockExchange() {
 		StockExchange.publisher = new TopicPublisher(null);
@@ -50,19 +51,21 @@ public class StockExchange {
 
 		@Override
 		public void run() {
-			for (StockQuote quote : generateQuotes()) {
+			for (StockQuote quote : stockList) {
 				double newStockQuote = 0;
 				newStockQuote = quote.getQuote() + this.computeVariance(2);
 				quote.setQuote(newStockQuote);
+				quote.setTimeInMillis(System.currentTimeMillis());
 				publisher.publishObjectMessage(quote);
 			}
 
 		}
 
 		private long computeVariance(double variance) {
-			int randomSign = (((int) Math.random() * 10) % 2 == 0) ? -1 : 1;
-			return (long) (0 + (Math.random() * ((variance - 0) + 1))
-					* randomSign);
+//			Double randomValue =  Math.random() * 1000;
+//			int randomSign = (randomValue.intValue() % 2 == 0) ? -1 : 1;
+			long value = (long) (0 + (Math.random() * ((variance - 0) + 1)));
+			return value;
 		}
 	}
 

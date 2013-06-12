@@ -7,6 +7,7 @@ import javax.jms.JMSException;
 
 import jms.TopicConsumer;
 import model.Stock;
+import model.StockQuote;
 import ui.components.Dialog;
 import ui.main.MainFrame;
 
@@ -26,6 +27,7 @@ public class SearchSubmit implements EventHandler<ActionEvent> {
 			Stock stock = new Stock(this.getStockName());
 
 			this.addStock(stock);
+			this.frame.getTable().addQuote(new StockQuote("", "", this.getStockName(), 0.0, 0));
 			this.frame.createSerie(stock);
 			
 		} catch (JMSException e) {

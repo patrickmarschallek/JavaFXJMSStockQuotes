@@ -27,13 +27,14 @@ public class Table extends TableView<StockQuote> {
 
 		this.getColumns().add(this.createTableColumn("ISIN", 50, "isin"));
 		this.getColumns().add(this.createTableColumn("WKN", 50, "wkn"));
-		this.getColumns().add(this.createTableColumn("Stock-Name", 50, "name"));
+		this.getColumns()
+				.add(this.createTableColumn("Stock-Name", 150, "name"));
 		this.getColumns().add(this.createTableColumn("Price", 50, "quote"));
 		this.getColumns().add(
 				this.createTableColumn("Time", 90, "timeInMillis"));
 
 		this.setPrefSize(800, 100);
-
+		
 		// bindings
 		this.setItems(this.stockList);
 	}
@@ -48,37 +49,24 @@ public class Table extends TableView<StockQuote> {
 		return column;
 	}
 
-	public void addQuote(StockQuote quote) {
+	public void addQuote(final StockQuote quote) {
+		boolean conatains = false;
 		for (StockQuote stockQuote : this.stockList) {
 			if (stockQuote.getName().equals(quote.getName())) {
-
+				conatains = true;
 			}
 		}
-		if (!this.stockList.contains(quote)) {
-			this.stockList.add(quote);
+		if (!conatains) {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					stockList.add(quote);
+				}
+			});
 		} else {
 			Dialog.showErrorDialog(this.frame.getPrimaryStage(),
 					"You are allready subscribed to this topic",
 					"Redundant Topic", "Warning");
-		}
-	}
-
-	public void updateTableObjects(final StockQuote quote) {
-		for (final StockQuote stockQuote : this.stockList) {
-			if (stockQuote.getName().equals(quote.getName())) {
-				Platform.runLater(new Runnable() {
-					@Override
-					public void run() {
-						stockQuote.setQuote(quote.getQuotePlain());
-						if (stockQuote.getWkn().isEmpty()) {
-							stockQuote.setWkn(quote.getWkn());
-						}
-						if (stockQuote.getIsin().isEmpty()) {
-							stockQuote.setIsin(quote.getIsin());
-						}
-					}
-				});
-			}
 		}
 	}
 

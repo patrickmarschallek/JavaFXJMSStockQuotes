@@ -20,8 +20,12 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.ColumnConstraintsBuilder;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.RowConstraintsBuilder;
 import javafx.stage.Stage;
 import model.Stock;
+import model.StockQuote;
 import ui.components.Table;
 import ui.handler.CloseHandler;
 import ui.handler.SearchSubmit;
@@ -68,11 +72,28 @@ public class MainFrame extends Application {
 		GridPane grid = new GridPane();
 		grid.setAlignment(Pos.CENTER);
 		grid.setHgap(20);
-		grid.setVgap(10);
+		grid.setVgap(15);
 
-		ColumnConstraints halfConstraint = ColumnConstraintsBuilder.create()
+		// row constraints
+		RowConstraints fixLineConstraint = RowConstraintsBuilder.create()
+				.prefHeight(60).build();
+
+		RowConstraints chartLineConstraint = RowConstraintsBuilder.create()
+				.fillHeight(true)
+				.minHeight(300)
+				.build();
+		chartLineConstraint.setVgrow(Priority.ALWAYS);
+		
+		RowConstraints tableLineConstraint = RowConstraintsBuilder.create()
+				.percentHeight(25).build();
+		
+		// column constraints
+		ColumnConstraints fullConstraint = ColumnConstraintsBuilder.create()
 				.percentWidth(95).build();
-		grid.getColumnConstraints().add(halfConstraint);
+		fullConstraint.setHgrow(Priority.ALWAYS);
+		
+		grid.getRowConstraints().addAll(fixLineConstraint,chartLineConstraint,tableLineConstraint,fixLineConstraint);
+		grid.getColumnConstraints().add(fullConstraint);
 
 		grid.add(this.searchBar, 0, 0);
 		grid.add(this.lineChart, 0, 1);
@@ -125,6 +146,7 @@ public class MainFrame extends Application {
 
 		this.searchBar.getChildren().addAll(this.lblStockSubscribe,
 				this.txtSearchField, btnSubscribe);
+		this.searchBar.setAlignment(Pos.CENTER_LEFT);
 	}
 
 	public void initBottomPanel() {
@@ -141,8 +163,29 @@ public class MainFrame extends Application {
 
 		this.buttonPanel.getChildren().addAll(this.btnUnsubscribe,
 				this.txtUnsubscribe, this.btnClose);
+		this.buttonPanel.setAlignment(Pos.CENTER_LEFT);
 	}
 
+	public void updateTableObjects(final StockQuote quote) {
+		for (final StockQuote stockQuote : this.table.getItems()) {
+			if (stockQuote.getName().equals(quote.getName())) {
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						stockQuote.setQuote(quote.getQuotePlain());
+						stockQuote.setTimeInMillis(quote.getTimeInMillisPlain());
+						if (stockQuote.getWkn().isEmpty()) {
+							stockQuote.setWkn(quote.getWkn());
+						}
+						if (stockQuote.getIsin().isEmpty()) {
+							stockQuote.setIsin(quote.getIsin());
+						}
+					}
+				});
+			}
+		}
+	}
+	
 	public void fillSerie(final XYChart.Series<String, Number> serie,
 			long time, double quote) {
 		Time value = new Time(time);
@@ -169,14 +212,9 @@ public class MainFrame extends Application {
 	}
 
 	public XYChart.Series<String, Number> createSerie(Stock stock) {
-		Time value = new Time(System.currentTimeMillis());
-
 		XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
 		series.setName(stock.getName());
 
-		// populating the series with data
-		series.getData().add(
-				new XYChart.Data<String, Number>(value.toString(), 0.0));
 		this.serieMap.put(stock.getName(), series);
 		this.lineChart.getData().add(series);
 		return series;
