@@ -81,7 +81,7 @@ public class TopicPublisher {
   	
     public void publishObjectMessage(StockQuote quote){
         try {
-        	topic = session.createTopic("dax."+quote.getName());
+        	topic = session.createTopic(quote.getName());
 			publisher = session.createProducer(topic);
 	        publisher.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 			publisher.send(session.createObjectMessage(quote));

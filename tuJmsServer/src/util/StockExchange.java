@@ -17,7 +17,7 @@ public class StockExchange {
 	}
 
 	public void run() {
-		for (StockQuote stock : this.stockList) {
+		for (StockQuote stock : StockExchange.stockList) {
 			Timer timer = new Timer();
 			ExchangeTask exTask = new ExchangeTask(stock);
 			timer.scheduleAtFixedRate(exTask,
@@ -34,19 +34,19 @@ public class StockExchange {
 		ArrayList<StockQuote> quoteList = new ArrayList<StockQuote>();
 
 		quoteList.add(new StockQuote("555750", "DE0005557508",
-				"Deutsche Telekom Aktie", 50.92, System.currentTimeMillis()));
+				"Deutsche Telekom Aktie", 8.76, System.currentTimeMillis()));
 		quoteList.add(new StockQuote("766400", "DE0007664005",
-				"Volkswagen St Aktie", 30.92, System.currentTimeMillis()));
+				"Volkswagen St Aktie", 152.63, System.currentTimeMillis()));
 		quoteList.add(new StockQuote("710000", "DE0007100000", "Daimler Aktie",
 				20.02, System.currentTimeMillis()));
 		quoteList.add(new StockQuote("870747", "US5949181045",
-				"Microsoft Aktie", 80.92, System.currentTimeMillis()));
+				"Microsoft Aktie", 25.96, System.currentTimeMillis()));
 		quoteList.add(new StockQuote("A1EWWW", "DE00A1EWWW0", "Adidas Aktie",
-				80.92, System.currentTimeMillis()));
+				81.66, System.currentTimeMillis()));
 		quoteList.add(new StockQuote("BASF11", "DE000BASF111", "BASF Aktie",
-				71.45, System.currentTimeMillis()));
+				72.30, System.currentTimeMillis()));
 		quoteList.add(new StockQuote("ENAG99", "DE000ENAG999", "E.ON SE Aktie",
-				12.70, System.currentTimeMillis()));
+				13.10, System.currentTimeMillis()));
 		return quoteList;
 	}
 

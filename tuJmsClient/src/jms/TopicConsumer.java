@@ -48,6 +48,7 @@ public class TopicConsumer implements Serializable {
 
 	private void init() throws JMSException {
 		this.factory = new ActiveMQConnectionFactory(this.url);
+		System.out.println(this.factory.getBrokerURL());
 		this.connection = this.factory.createConnection();
 		this.session = this.connection.createSession(false,
 				Session.AUTO_ACKNOWLEDGE);
