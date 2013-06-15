@@ -48,11 +48,11 @@ public class TopicConsumer implements Serializable {
 
 	private void init() throws JMSException {
 		this.factory = new ActiveMQConnectionFactory(this.url);
-		System.out.println(this.factory.getBrokerURL());
 		this.connection = this.factory.createConnection();
 		this.session = this.connection.createSession(false,
 				Session.AUTO_ACKNOWLEDGE);
-		requestsQueue = session.createQueue("requests");
+		this.requestsQueue = this.session.createQueue("requests");
+		this.connection.start();
 	}
 
 	public void requestReply(String stockName) throws JMSException {
@@ -72,7 +72,7 @@ public class TopicConsumer implements Serializable {
 	}
 		
 	public void subscribe(String stockName) throws JMSException {
-		this.topic = session.createTopic("dax." + stockName);
+		this.topic = session.createTopic(stockName);
 		MessageConsumer consumer = session.createConsumer(topic);
 		consumer.setMessageListener(this.messageHanlder);
 		this.connection.start();

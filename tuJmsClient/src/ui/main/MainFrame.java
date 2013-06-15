@@ -1,16 +1,13 @@
 package ui.main;
 
+import java.io.IOException;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -21,27 +18,23 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.ColumnConstraintsBuilder;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.RowConstraintsBuilder;
 import javafx.stage.Stage;
-import javafx.util.Callback;
-import jmx.Management;
+import javafx.stage.WindowEvent;
 import model.Stock;
+import ui.components.ListPanel;
 import ui.components.Table;
 import ui.handler.CloseHandler;
-import ui.handler.SearchSubmit;
-import ui.handler.UnsubscribeHandler;
+import util.Serializer;
+import util.StockQuote;
 
 public class MainFrame extends Application {
 
@@ -52,19 +45,13 @@ public class MainFrame extends Application {
 	private LineChart<String, Number> lineChart;
 	private Table table;
 	private HBox buttonPanel = new HBox();
-	private HBox searchBar = new HBox();
-	private Label lblStockSubscribe;
-	private TextField txtSearchField;
 	private Button btnClose;
-	private Button btnUnsubscribe;
-	private TextField txtUnsubscribe;
-	private ListView<String> listView;
+	private ListView<CheckBox> listView;
 
 	@Override
 	public void init() throws Exception {
 		super.init();
 		// init components
-		this.initSearchBar();
 		this.initLineChart();
 		this.initTable();
 		this.initBottomPanel();
@@ -90,109 +77,57 @@ public class MainFrame extends Application {
 		chartLineConstraint.setVgrow(Priority.ALWAYS);
 
 		RowConstraints tableLineConstraint = RowConstraintsBuilder.create()
-				.percentHeight(25).build();
+				.percentHeight(15).build();
 
 		// column constraints
 		ColumnConstraints fullConstraint = ColumnConstraintsBuilder.create()
 				.minWidth(300).fillWidth(true).build();
+
 		ColumnConstraints listConstraint = ColumnConstraintsBuilder.create()
 				.minWidth(250).build();
 		fullConstraint.setHgrow(Priority.ALWAYS);
 
-		grid.getRowConstraints().addAll(fixLineConstraint, chartLineConstraint,
+		grid.getRowConstraints().addAll(chartLineConstraint,
 				tableLineConstraint, fixLineConstraint);
+
 		grid.getColumnConstraints().addAll(listConstraint, fullConstraint);
 		grid.setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
 		grid.setPadding(new Insets(10, 10, 10, 10));
 
-		grid.add(this.searchBar, 1, 0);
-		grid.add(this.lineChart, 1, 1);
-		grid.add(this.table, 1, 2);
-		grid.add(this.buttonPanel, 1, 3);
+		grid.add(this.lineChart, 1, 0);
+		grid.add(this.table, 1, 1);
+		grid.add(this.buttonPanel, 1, 2);
 		grid.add(this.listView, 0, 0, 1, 3);
 
 		Scene scene = new Scene(grid, 900, 600);
 
 		// Window Properties
-		primaryStage.setTitle("JMS Stock Client");
-		primaryStage.setScene(scene);
-		primaryStage.sizeToScene();
-		primaryStage.setResizable(false);
-		primaryStage.show();
+		this.primaryStage.setTitle("JMS Stock Client");
+		this.primaryStage.setScene(scene);
+		this.primaryStage.sizeToScene();
+		this.primaryStage.setResizable(false);
+		this.primaryStage.show();
 
-	}
-
-	public static final ObservableList data = FXCollections
-			.observableArrayList();
-
-	public void initList() {
-		listView = new ListView(data);
-		listView.setPrefSize(200, 250);
-		listView.setEditable(true);
-		Management mx = new Management();
-		List<String> availablestock = mx.getTopics();
-		for (String stockName : availablestock) {
-			// final CheckBox cb = cbs[i] = new CheckBox(String.valueOf(i));
-			// cb.selectedProperty().addListener(new ChangeListener<Boolean>() {
-			// public void changed(ObservableValue<? extends Boolean> ov,
-			// Boolean old_val, Boolean new_val) {
-			//
-			// }
-			// });
-
-			data.add(stockName);
-		}
-
-		listView.setItems(data);
-
-		listView.setCellFactory(new Callback<ListView<String>, ListCell<String>>() {
-			@Override
-			public ListCell<String> call(ListView<String> arg0) {
-				// System.out.println(arg0);
-				// ListCell<String> cell = new ListCell<String>();
-				// cell.setItem("new");
-				return new XCell();
+		// click close event handle
+		this.primaryStage.setOnHiding(new EventHandler<WindowEvent>() {
+			public void handle(WindowEvent event) {
+				System.exit(0);
 			}
 		});
 
 	}
 
-	static class XCell extends ListCell<String> {
-		HBox hbox = new HBox();
-		Label label = new Label();
-		Pane pane = new Pane();
-		CheckBox checkBox = new CheckBox();
+	public void initList() {
+		ArrayList<StockQuote> list = new ArrayList<StockQuote>();
 
-		public XCell() {
-			super();
-			hbox.getChildren().addAll(label, pane, checkBox);
-			HBox.setHgrow(pane, Priority.ALWAYS);
-			checkBox.selectedProperty().addListener(
-					new ChangeListener<Boolean>() {
-						public void changed(
-								ObservableValue<? extends Boolean> ov,
-								Boolean old_val, Boolean new_val) {
-							if(new_val){
-								System.out.println("checked");
-							}else{
-								System.out.println("unchecked");
-							}
-						}
-					});
-
+		Serializer ser = new Serializer(list, "stockList.ser");
+		try {
+			list = ser.readObject(this);
+		} catch (IOException e) {
+			// Dialog.showErrorDialog(this.primaryStage, "deserialize Error",
+			// "cant read", "Error");
 		}
-
-		@Override
-		protected void updateItem(String item, boolean empty) {
-			super.updateItem(item, empty);
-			setText(null); // No text in label of super class
-			if (empty) {
-				setGraphic(null);
-			} else {
-				label.setText(item != null ? item : "<null>");
-				setGraphic(hbox);
-			}
-		}
+		this.listView = new ListPanel(this, list);
 	}
 
 	public void initTable() {
@@ -208,29 +143,13 @@ public class MainFrame extends Application {
 		yAxis.setLabel("price");
 
 		// creating the chart
-		lineChart = new LineChart<String, Number>(xAxis, yAxis);
-		lineChart.setTitle("Stock Monitoring, 2013");
+		this.lineChart = new LineChart<String, Number>(xAxis, yAxis);
+		this.lineChart.setTitle("Stock Monitoring, 2013");
 
 		// defining a series
 		for (Stock stock : this.stocks) {
 			this.createSerie(stock);
 		}
-	}
-
-	public void initSearchBar() {
-		this.lblStockSubscribe = new Label(" Enter a Stockname to subscribe:");
-
-		this.txtSearchField = new TextField();
-		txtSearchField.setEditable(true);
-
-		Button btnSubscribe = new Button();
-		btnSubscribe.setText("Subscribe");
-
-		btnSubscribe.setOnAction(new SearchSubmit(this));
-
-		this.searchBar.getChildren().addAll(this.lblStockSubscribe,
-				this.txtSearchField, btnSubscribe);
-		this.searchBar.setAlignment(Pos.CENTER_LEFT);
 	}
 
 	public void initBottomPanel() {
@@ -239,14 +158,7 @@ public class MainFrame extends Application {
 		this.btnClose.setText("Save & Close");
 		this.btnClose.setOnAction(new CloseHandler(this));
 
-		this.btnUnsubscribe = new Button();
-		this.btnUnsubscribe.setText("Unsubscribe");
-		this.btnUnsubscribe.setOnAction(new UnsubscribeHandler(this));
-
-		this.txtUnsubscribe = new TextField();
-
-		this.buttonPanel.getChildren().addAll(this.btnUnsubscribe,
-				this.txtUnsubscribe, this.btnClose);
+		this.buttonPanel.getChildren().addAll(this.btnClose);
 		this.buttonPanel.setAlignment(Pos.CENTER_LEFT);
 	}
 
@@ -309,28 +221,8 @@ public class MainFrame extends Application {
 		return buttonPanel;
 	}
 
-	public HBox getSearchBar() {
-		return searchBar;
-	}
-
-	public Label getLblStockSubscribe() {
-		return lblStockSubscribe;
-	}
-
-	public TextField getTxtSearchField() {
-		return txtSearchField;
-	}
-
 	public Button getBtnClose() {
 		return btnClose;
-	}
-
-	public Button getBtnUnsubscribe() {
-		return btnUnsubscribe;
-	}
-
-	public TextField getTxtUnsubscribe() {
-		return txtUnsubscribe;
 	}
 
 }

@@ -61,7 +61,7 @@ public class StockExchange {
 		@Override
 		public void run() {
 			double newStockQuote = 0;
-			newStockQuote = stockQuote.getQuote() + this.computeVariance(15);
+			newStockQuote = stockQuote.getQuote() + this.computeVariance(2);
 			stockQuote.setQuote(newStockQuote);
 			stockQuote.setTimeInMillis(System.currentTimeMillis());
 			publisher.publishObjectMessage(stockQuote);

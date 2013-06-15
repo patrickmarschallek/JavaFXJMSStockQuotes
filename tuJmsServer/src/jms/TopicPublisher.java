@@ -41,7 +41,7 @@ public class TopicPublisher {
     }
     
     public void init(){
-    	ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(url);
+    	ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(this.url);
     	
         try {
 			connection = factory.createConnection();
