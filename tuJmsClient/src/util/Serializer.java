@@ -50,10 +50,8 @@ public class Serializer {
 			file = new FileInputStream(this.fileName);
 			InputStream buffer = new BufferedInputStream(file);
 			ObjectInput input = new ObjectInputStream(buffer);
-
 			// deserialize the List
 			recoveredStocks = (ArrayList<StockQuote>) input.readObject();
-
 			file.close();
 			buffer.close();
 			input.close();
@@ -70,6 +68,7 @@ public class Serializer {
 			try {
 				TopicConsumer consumer = new TopicConsumer(null, frame);
 				consumer.subscribe(stockQuote.getName());
+				consumer.requestReply(stockQuote.getName());
 				Stock stock = new Stock(stockQuote.getName());
 				model.StockQuote tableQuote = new model.StockQuote(
 						stockQuote.getIsin(), stockQuote.getWkn(),

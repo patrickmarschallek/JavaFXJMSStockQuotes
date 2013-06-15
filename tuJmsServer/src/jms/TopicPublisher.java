@@ -20,82 +20,79 @@ import util.StockExchange;
 import util.StockQuote;
 
 public class TopicPublisher {
-    
+
 	private Connection connection;
-    private Session session;
-    private MessageProducer publisher;
-    private String url;
-    private Topic topic;
+	private Session session;
+	private MessageProducer publisher;
+	private String url;
+	private Topic topic;
 	private ActiveMQConnectionFactory factory;
-	private StockExchange exchange;
 	private Queue requestsQueue;
 	private MessageConsumer requestConsumer;
-	
-    public TopicPublisher(String url){
-        if(url == null){
-        	this.url = "tcp://localhost:61616";
-        }else{
-        	this.url = url;
-        }
-    	init();
-    }
-    
-    public void init(){
-    	ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(this.url);
-    	
-        try {
+
+	public TopicPublisher(String url) {
+		if (url == null) {
+			this.url = "tcp://localhost:61616";
+		} else {
+			this.url = url;
+		}
+		init();
+	}
+
+	public void init() {
+		this.factory = new ActiveMQConnectionFactory(this.url);
+
+		try {
 			connection = factory.createConnection();
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			requestsQueue = session.createQueue("requests");
-  			requestConsumer = session.createConsumer(requestsQueue);
-  			requestConsumer.setMessageListener(new MessageListener() {
-  				public void onMessage(Message arg0) {
-  					handleRequestMessage(arg0);		
-  				}
-  			});
-  			connection.start();
+			requestConsumer = session.createConsumer(requestsQueue);
+			requestConsumer.setMessageListener(new MessageListener() {
+				public void onMessage(Message arg0) {
+					handleRequestMessage(arg0);
+				}
+			});
+			connection.start();
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
-    }
-    
-      
-  	private void handleRequestMessage(Message msg) {
-  		System.out.println("request message received!");
-  		try {
-  			String stockName = msg.getStringProperty("stockName");
-  			Destination replyDest = msg.getJMSReplyTo();
-  			
-  			QueueConnection qConnection = factory.createQueueConnection();
-  			QueueSession qSession = qConnection.createQueueSession(false,
-  					Session.AUTO_ACKNOWLEDGE);
-  			MessageProducer mp = qSession.createProducer(replyDest);
-  			mp.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-  			mp.send(qSession.createObjectMessage(exchange
-  					.getCurrentQuote(stockName)));
-  		} catch (JMSException e) {
-  			// TODO Auto-generated catch block
-  			e.printStackTrace();
-  		}
-  	}
-  	
-    public void publishObjectMessage(StockQuote quote){
-        try {
-        	topic = session.createTopic(quote.getName());
+	}
+
+	private void handleRequestMessage(Message msg) {
+		try {
+			String stockName = msg.getStringProperty("stockName");
+			Destination replyDest = msg.getJMSReplyTo();
+
+			QueueConnection qConnection = factory.createQueueConnection();
+			QueueSession qSession = qConnection.createQueueSession(false,
+					Session.AUTO_ACKNOWLEDGE);
+			MessageProducer mp = qSession.createProducer(replyDest);
+			mp.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+			mp.send(qSession.createObjectMessage(StockExchange
+					.getCurrentQuote(stockName)));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void publishObjectMessage(StockQuote quote) {
+		try {
+			topic = session.createTopic(quote.getName());
 			publisher = session.createProducer(topic);
-	        publisher.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+			publisher.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 			publisher.send(session.createObjectMessage(quote));
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
-    }
-    
-    public void close(){
-        try {
+	}
+
+	public void close() {
+		try {
 			connection.stop();
-	        connection.close();
+			connection.close();
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
-    }
+	}
 }

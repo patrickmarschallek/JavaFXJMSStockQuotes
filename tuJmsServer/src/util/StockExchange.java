@@ -75,7 +75,7 @@ public class StockExchange {
 		}
 	}
 
-	public StockQuote getCurrentQuote(String stockName) {
+	public static StockQuote getCurrentQuote(String stockName) {
 		for (StockQuote quote : stockList) {
 			if (quote.getName().equals(stockName)) {
 				return quote;
