@@ -75,6 +75,8 @@ public class TopicConsumer implements Serializable {
 		this.topic = session.createTopic(stockName);
 		MessageConsumer consumer = session.createConsumer(topic);
 		consumer.setMessageListener(this.messageHanlder);
+
+		requestReply(stockName);
 		this.connection.start();
 	}
 

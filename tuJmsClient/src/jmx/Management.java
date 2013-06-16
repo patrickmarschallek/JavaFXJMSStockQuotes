@@ -51,9 +51,11 @@ public class Management {
 
 			}
 			jmxc.close();
-		} catch (MalformedObjectNameException | IOException e) {
+		} catch (MalformedObjectNameException e) {
 			// TODO Auto-generated catch block
 //			e.printStackTrace();
+		} catch (IOException e){
+			e.printStackTrace();
 		}
 
 		return list;
